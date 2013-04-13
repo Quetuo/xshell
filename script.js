@@ -1,4 +1,13 @@
 /**
+ * Global variables
+ */
+
+URL = "http://" + window.location.host + window.location.pathname;
+TERM = null;
+STARTTIME = null;
+HISTORY = [];
+
+/**
  * Array holding a list of scripts to dynamically load
  * @type {Array}
  */
@@ -94,16 +103,10 @@ function windowLoad(){
  * Anonymous function to be called immediately
  */
 (function(){
+    STARTTIME = new Date();
     // Load all our resources
     window.onload = windowLoad;
 })();
-
-/**
- * Global variables
- */
-
-URL = "http://" + window.location.host + window.location.pathname;
-TERM = null;
 
 /**
  * Function to be called when all resources have finished loading
@@ -114,9 +117,9 @@ function ready() {
     $("#xshell-version").html(VERSION);
     $("#xshell-version").get(0).href="http://www.quetuo.net/xshell?" + VERSION;
     /* Get rid of loading screen */
-    $("#div-loading").slideUp();
+    $("#div-loading").hide("slide", { direction: "right" }, 200);//.slideUp();
     /* Set up sidebar */
-    $("#sidebar li").each(function(index) {
+    $("#sidebar li.li-shortcut").each(function(index) {
         /* Change classes depending on active or not */
         if (this.dataset.active == "1") {
             this.className="sidebar-li-active";
@@ -131,6 +134,7 @@ function ready() {
                     this.dataset.active = "0";
                     this.className="sidebar-li-inactive";
                     $("#page-" + this.dataset.link).attr("class", "page-container-hidden");
+                    HISTORY.push(this.dataset.link);
                 }
             });
             /* Activate appropriate option */
@@ -142,15 +146,19 @@ function ready() {
             $("#page-" + this.dataset.link).attr("class", "page-container");
             var activateFunction = window[this.dataset.link.replace("-", "") + "_activate"];
             activateFunction();
+
         });
     });
+    go_to("dashboard");
     /* Check if a sidebar location is already specified in URL */
     $("#sidebar li").each(function(index) {
         if (("#" + this.dataset.link) == window.location.hash) {
             $(this).click();
         }
     });
-    /* Set up terminal */
+    
+    var endtime = new Date();
+    xshell_log("Loaded in " + (endtime - STARTTIME) + "ms");
  }
  
 function wait(on) {
@@ -299,4 +307,8 @@ function console_launch() {
 function xshell_log(text) {
     console.log("xshell: " + text);
     $("#p-log").html(text + "<br />" + $("#p-log").html());
+}
+
+function go_back() {
+    go_to(HISTORY.pop());
 }
