@@ -1,67 +1,120 @@
-function init(i) {
-    if (i == 0) {
-        /* Load Open Sans */
-        document.getElementById("loading-text").innerHTML = "Loading font Open Sans...";
-        var f = document.createElement("link");
-        f.setAttribute("rel", "stylesheet");
-        f.setAttribute("type", "text/css");
-        f.setAttribute("href", "http://fonts.googleapis.com/css?family=Open+Sans:300");
-        f.onload = function(){init(1);};
-        document.getElementsByTagName("head")[0].appendChild(f);
-    } else if (i == 1) {
-        /* Load Open Sans Condensed */
-        document.getElementById("loading-text").innerHTML = "Loading font Open Sans Condensed...";
-        var f = document.createElement("link");
-        f.setAttribute("rel", "stylesheet");
-        f.setAttribute("type", "text/css");
-        f.setAttribute("href", "http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300");
-        f.onload = function(){init(2);};
-        document.getElementsByTagName("head")[0].appendChild(f);
-    } else if (i == 2) {
-        /* Load Cutive Mono */
-        document.getElementById("loading-text").innerHTML = "Loading font Cutive Mono...";
-        var f = document.createElement("link");
-        f.setAttribute("rel", "stylesheet");
-        f.setAttribute("type", "text/css");
-        f.setAttribute("href", "http://fonts.googleapis.com/css?family=Cutive+Mono");
-        f.onload = function(){init(3);};
-        document.getElementsByTagName("head")[0].appendChild(f);
-    } else if (i == 3) {
-        /* Load prettify */
-        document.getElementById("loading-text").innerHTML = "Loading prettify.js...";
-        var f = document.createElement("script");
-        f.setAttribute("type", "text/javascript");
-        f.setAttribute("src", "https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js");
-        f.onload = function(){init(4);};
-        document.getElementsByTagName("head")[0].appendChild(f);
-    } else if (i == 4) {
-        /* Load jQuery */
-        document.getElementById("loading-text").innerHTML = "Loading jQuery...";
-        var f = document.createElement("script");
-        f.setAttribute("type", "text/javascript");
-        f.setAttribute("src", "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js");
-        f.onload = function(){init(5);};
-        document.getElementsByTagName("head")[0].appendChild(f);
-    } else if (i == 5) {
-        /* Load jQuery */
-        document.getElementById("loading-text").innerHTML = "Loading terminal...";
-        var f = document.createElement("script");
-        f.setAttribute("type", "text/javascript");
-        f.setAttribute("src", "jquery.terminal.js");
-        f.onload = ready;
-        document.getElementsByTagName("head")[0].appendChild(f);
-    }
+/**
+ * Array holding a list of scripts to dynamically load
+ * @type {Array}
+ */
+var scripts = [
+    'jquery.terminal.js',
+    'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+    'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+    'https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js'
+];
+
+/**
+ * Array holding a list of stylesheets to dynamically load
+ * @type {Array}
+ */
+var styles = [
+    'http://fonts.googleapis.com/css?family=Open+Sans:300',
+    'http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300'
+];
+
+/**
+ * Dynamically loads a JavaScript file.
+ * @param {String} url The URL of the file to load
+ * @param {Function} callback A function to be called when the file has been loaded
+ * @return {null}
+ */
+function loadScript(url, callback){
+    console.log('Loading ' + url)
+    var script = document.createElement('script');
+    script.setAttribute('type', 'text/javascript');
+    script.setAttribute('src', url);
+    script.onload = callback;
+    document.getElementsByTagName('head')[0].appendChild(script);
+    return;
 }
+
+/**
+ * Dynamically loads a stylesheet
+ * @param {String} url The URL of the file to load
+ * @param {Function} callback A function to be called when the file has been loaded
+ * @return {null}
+ */
+function loadStyle(url, callback) {
+    console.log('Loading ' + url);
+    var style = document.createElement('link');
+    style.setAttribute('rel', 'stylesheet');
+    style.setAttribute('type', 'text/css');
+    style.setAttribute('href', url);
+    style.onload = callback;
+    document.getElementsByTagName('head')[0].appendChild(style);
+    return;
+}
+
+/**
+ * Dynamically load all required resources
+ * @return {null}
+ */
+function loadResources() {
+    // Check if we're done
+    if (styles.length == 0 && scripts.length == 0) {
+        document.getElementById('loading-text').innerHTML = 'Done!';
+        setTimeout(ready, 500);
+        return;
+    }
+    var url;
+    // Load stylesheets first
+    if (styles.length > 0) {
+        url = styles.pop();
+        document.getElementById('loading-text').innerHTML = 
+            'Loading ' + url + '...';
+        loadStyle(url, loadResources);
+        return;
+    }
+    // Load scripts
+    if (scripts.length > 0) {
+        url = scripts.pop();
+        document.getElementById('loading-text').innerHTML = 
+            'Loading ' + url + '...';
+        loadScript(url, loadResources);
+        return;
+    }
+    return;
+}
+
+/**
+ * Function to be called on the window.onload event
+ * @return {null}
+ */
+function windowLoad(){
+    loadResources();
+}
+
+/**
+ * Anonymous function to be called immediately
+ */
+(function(){
+    // Load all our resources
+    window.onload = windowLoad;
+})();
+
+/**
+ * Global variables
+ */
 
 URL = "http://" + window.location.host + window.location.pathname;
 TERM = null;
 
+/**
+ * Function to be called when all resources have finished loading
+ * @return {null}
+ */
 function ready() {
     /* Set up version info */
     $("#xshell-version").html(VERSION);
     $("#xshell-version").get(0).href="http://www.quetuo.net/xshell?" + VERSION;
     /* Get rid of loading screen */
-    $("#div-loading").remove();
+    $("#div-loading").slideUp();
     /* Set up sidebar */
     $("#sidebar li").each(function(index) {
         /* Change classes depending on active or not */
