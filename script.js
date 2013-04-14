@@ -273,6 +273,23 @@ function filesystem_activate() {
     filesystem_navigate($(".file-browser").get(0).dataset.dir);
 }
 
+function vulnerabilities_activate() {
+    wait(true);
+    $.getJSON(URL + "?ajax=vulnerabilities", function(data){
+        $("div#page-vulnerabilities div.page").empty();
+        for (var id in data) {
+            var vuln = $('<div class="tile double orange" data-id="' + id + '">'
+                + '<h3>' + id + '</h3>'
+                + '<p>' + data[id] + '</p>'
+                + '</div>').appendTo("div#page-vulnerabilities div.page");
+            vuln.click(function() {
+                window.open('http://www.osvdb.org/show/osvdb/' + this.dataset.id);
+            });
+        }
+        wait(false);
+    });
+}
+
 function console_activate() {
     console.log("console_activate");
     $("#console").terminal(function(command, term) {

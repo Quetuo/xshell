@@ -118,6 +118,25 @@
         {
             echo json_encode(parse_ini_file(php_ini_loaded_file()));
         }
+        if ($_REQUEST['ajax'] == 'vulnerabilities')
+        {
+            // Get Apache version
+            $processUser = posix_getpwuid(posix_geteuid());
+            $username = $processUser['name'];
+            $ps = explode("\n", shell_exec("ps --no-headers -o cmd U " . $processUser['name']));
+            $ps = explode(" ", $ps[0]);
+            $ps = $ps[0];
+            preg_match('#(?:Apache/)(\d+\.\d+\.\d+)#', shell_exec($ps . ' -v'), $matches);
+            $version = $matches[1];
+            // Search for Apache vulns
+            $osvdb = file_get_contents("http://www.osvdb.org/search?search%5Bvuln_title%5D=Apache+" . $version . "&search%5Btext_type%5D=alltext");
+            preg_match('$(?:<a href="/show/osvdb/)(\d+)(?:.*?<a href="#" onclick="Element\.toggle\(\'desc\d+\'\);; return false;">)(.*?)(?:</a>)$s', $osvdb, $matches);
+            for ($i = 1; $i < count($matches); $i += 2)
+            {
+                $ret[$matches[$i]] = $matches[$i + 1];
+            }
+            echo json_encode($ret);
+        }
         die();
     }
     else
