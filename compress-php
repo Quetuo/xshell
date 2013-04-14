@@ -1,0 +1,10 @@
+#!/usr/bin/php
+<?
+	if (count($argv) != 2) die();
+	$data = file_get_contents($argv[1]);
+	// Replace includes
+	$data = preg_replace_callback("#(?:include\(')([^']*?)(?:'\);)#", function($match) {
+		return " ?> " . file_get_contents($match[1]) . " <?php ";
+	}, $data);
+	echo $data;
+?>

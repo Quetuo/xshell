@@ -1,0 +1,17 @@
+#!/usr/bin/php
+<?
+	if (count($argv) != 2) die();
+	$data = file_get_contents($argv[1]);
+	// Replace scripts
+	$data = preg_replace_callback('#(?:<script .*?src=")([^"]+)(?:.*?></script>)#', function($match) {
+		return "<script>" . file_get_contents($match[1]) . "</script>";
+		//var_dump($match);
+		//echo $match . "\n";
+	}, $data);
+	// Replace stylesheets
+	$data = preg_replace_callback('#(?:<link .*?rel="stylesheet" .*?href=")([^"]*)(?:".*?/>)#', function($match) {
+		return "<style>" . file_get_contents($match[1]) . "</style>";
+	}, $data);
+	
+	echo $data;
+?>
