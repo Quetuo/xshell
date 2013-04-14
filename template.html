@@ -7,9 +7,6 @@
         <link rel="stylesheet" type="text/css" href="style.css" />
         <link rel="stylesheet" type="text/css" href="terminal.css" />
         <script src="script.js"></script>
-        <!--[if IE]>
-            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
     </head>
     <body>
         <!-- BEGIN LOADING SCREEN -->
@@ -22,6 +19,7 @@
         <header>
             <div>
                 <span style="color: #e02222;">x</span><span>shell</span> <a href="http://www.quetuo.net/xshell" id="xshell-version"></a>
+                <a class="icon">&#xf0a8;</a>
             </div>
         </header>
         <!-- END HEADER -->
@@ -133,6 +131,22 @@
                                 <p>HTML file</p>
                             </li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- File editor -->
+            <div class="page-container-hidden" id="page-file-editor">
+                <h3>File Editor <small>Undefined</small></h3>
+                <div class="page">
+                    <div id="editor"></div><br />
+                    <div class="tile blue" id="tile-save">
+                        <span class="tile-icon">&#xf0c7;</span>
+                    </div>
+                    <div class="tile orange" id="tile-download">
+                        <span class="tile-icon">&#xf019;</span>
+                    </div>
+                    <div class="tile red" id="tile-delete">
+                        <span class="tile-icon">&#xf014;</span>
                     </div>
                 </div>
             </div>

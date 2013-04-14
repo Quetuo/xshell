@@ -7,12 +7,14 @@ TERM = null;
 STARTTIME = null;
 HISTORY = [];
 LOADING_NOTES = (window.innerWidth >= 1166) ? '' : 'Your screen is smaller than 1166 pixels wide. Some pages may not render correctly.'
+EDITOR = null;
 
 /**
  * Array holding a list of scripts to dynamically load
  * @type {Array}
  */
 var scripts = [
+    'http://rawgithub.com/ajaxorg/ace-builds/master/src-noconflict/ace.js',
     'https://raw.github.com/jcubic/jquery.terminal/master/js/jquery.terminal-min.js',
     'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
     'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
@@ -120,6 +122,9 @@ function ready() {
     $("#xshell-version").get(0).href="http://www.quetuo.net/xshell?" + VERSION;
     /* Get rid of loading screen */
     $("#div-loading").hide("slide", { direction: "right" }, 200);//.slideUp();
+    $("header div a.icon").click(function() {
+        go_back();
+    });
     /* Set up sidebar */
     $("#sidebar li.li-shortcut").each(function(index) {
         /* Change classes depending on active or not */
@@ -130,37 +135,17 @@ function ready() {
         }
         /* Add onClick handler */
         $(this).click(function() {
-            /* Reset the sidebar */
-            $("#sidebar li").each(function() {
-                if (this.dataset.active == "1") {
-                    this.dataset.active = "0";
-                    this.className="sidebar-li-inactive";
-                    $("#page-" + this.dataset.link).attr("class", "page-container-hidden");
-                    HISTORY.push(this.dataset.link);
-                }
-            });
-            /* Activate appropriate option */
-            this.dataset.active = "1";
-            this.className="sidebar-li-active";
-            window.location.hash = this.dataset.link;
-            document.title = "xshell » " + this.innerHTML;
-            /* Activate page */
-            $("#page-" + this.dataset.link).attr("class", "page-container");
-            try {
-                var activateFunction = window[this.dataset.link.replace("-", "") + "_activate"];
-                activateFunction();
-            } catch(e) {
-                error_handler(e);
-            }
+            go_to(this.dataset.link);
         });
     });
+    go_to("dashboard");
+    var hash = window.location.hash;
     /* Check if a sidebar location is already specified in URL */
     $("#sidebar li").each(function(index) {
-        if (("#" + this.dataset.link) == window.location.hash) {
-            $(this).click();
+        if (("#" + this.dataset.link) == hash) {
+            go_to(this.dataset.link);
         }
     });
-    
     var endtime = new Date();
     xshell_log("Loaded in " + (endtime - STARTTIME) + "ms");
  }
@@ -171,14 +156,6 @@ function wait(on) {
     } else {
         document.body.style.cursor = 'auto';
     }
-}
-
-function go_to(a) {
-    $("#sidebar li").each(function(index) {
-        if (this.dataset.link == a) {
-            $(this).click();
-        }
-    });
 }
 
 function dashboard_activate() {
@@ -231,7 +208,6 @@ function filesystem_navigate(dir) {
         try {
             $(".file-browser").get(0).dataset.dir = data.dir;
             $("#page-file-system h3 small").html(data.dir);
-            console.dir(data);
             /* Clear file browser */
             $(".file-browser ul").empty();
             for (var i = 0; i < data.dirs.length; i ++) {
@@ -241,7 +217,6 @@ function filesystem_navigate(dir) {
                 });
             }
             for (var i = 0; i < data.files.length; i ++) {
-                console.log(data.files[i]);
                 var ft = 'misc';
                 var dot = data.files[i].indexOf(".");
                 var ext = (dot == -1 ? data.files[i] : data.files[i].substr(dot)).toLowerCase();
@@ -250,8 +225,9 @@ function filesystem_navigate(dir) {
                 if (ext == ".jpg" || ext == ".png" || ext == ".bmp") {ft = "image";}
                 $(".file-browser ul").append('<li class="file-browser file-' + ft + '" data-dir="' + data.files[i] + '" data-ft="' + ft + '"><h3>' + data.files[i] + '</h3><p>' + (ft == "misc" ? ext : ft) + ' file</p></li>');
                 $(".file-browser ul li").last().click(function(){
-                    console.log(this.dataset.dir);
-                    $(".right-sidebar").fadeIn(250);
+                    $("#page-file-editor").get(0).dataset.file = $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir;
+                    go_to('file-editor');
+                    /*$(".right-sidebar").show("slide", { direction: "right" }, 200);
                     $(".right-sidebar h3").html(this.dataset.dir);
                     if (this.dataset.ft == "image") {
                         $(".right-sidebar img").show();
@@ -265,7 +241,7 @@ function filesystem_navigate(dir) {
                         })
                         //$(".right-sidebar pre").load(URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir);
                         $(".right-sidebar img").hide();
-                    }
+                    }*/
                 });
                 if (ft == "image") {
                     console.log(URL + "?ajax=get&get=" + data.dir + "/" + data.files[i]);
@@ -322,13 +298,98 @@ function help_activate() {
     
 }
 
+function fileeditor_activate() {
+    $("#page-file-editor h3 small").html($("#page-file-editor").get(0).dataset.file);
+    if (EDITOR == null) {
+        EDITOR = ace.edit("editor");
+        EDITOR.setTheme("ace/theme/monokai");
+    }
+    EDITOR.setReadOnly(true);
+    wait(true);
+    $.getJSON(URL + "?ajax=getfileinfo&file=" + $("#page-file-editor").get(0).dataset.file, function(data) {
+        console.dir(data);
+        EDITOR.setValue(data.contents);
+        EDITOR.setReadOnly(!data.writeable);
+        if (data.writeable == true) {
+            $("#tile-save").click(function(){
+                console.log("Save");
+                EDITOR.setReadOnly(true);
+                wait(true);
+                $.post(URL + "?ajax=save&save=" + $("#page-file-editor").get(0).dataset.file, {contents: EDITOR.getValue()}, function(data) {
+                    console.dir(data);
+                    EDITOR.setReadOnly(false);
+                    wait(false);
+                })
+            });
+            $("#tile-save").removeClass("inactive");
+            $("#tile-delete").click(function(){
+
+            });
+            $("#tile-delete").removeClass("inactive");
+        }
+        else
+        {
+            $("#tile-save").addClass("inactive");
+            $("#tile-save").click(function(){});
+            $("#tile-delete").addClass("inactive");
+            $("#tile-delete").click(function(){});
+        }
+        wait(false);
+    });
+    $("#tile-download").click(function(){
+        window.open(URL + "?ajax=download&download=" + $("#page-file-editor").get(0).dataset.file);
+    });
+}
+
 function xshell_log(text) {
     console.log("xshell: " + text);
     $("#p-log").html(text + "<br />" + $("#p-log").html());
 }
 
+function open_page(a) {
+    // If it's a sidebar, simulate click
+    $("#sidebar li").each(function(index) {
+        if (this.dataset.link == a) {
+            /* Reset the sidebar */
+            $("#sidebar li").each(function() {
+                if (this.dataset.active == "1") {
+                    this.dataset.active = "0";
+                    this.className="sidebar-li-inactive";
+                    $("#page-" + this.dataset.link).attr("class", "page-container-hidden");
+                }
+            });
+            this.dataset.active = "1";
+            this.className="sidebar-li-active";
+            window.location.hash = this.dataset.link;
+            document.title = "xshell » " + this.innerHTML;
+        }
+    });
+    // If it's another page, show it
+    $("div.page-container-hidden").each(function(index) {
+        if (this.id == "page-" + a) {
+            console.log(a)
+            $("div.page-container").attr("class", "page-container-hidden");
+            $("#page-" + a).attr("class", "page-container");
+            try {
+                console.log(a.replace("-", "") + "_activate");
+                var activateFunction = window[a.replace("-", "") + "_activate"];
+                activateFunction();
+            } catch(e) {
+                error_handler(e);
+            }
+        }
+    });
+}
+
+function go_to(a) {
+    open_page(a);
+    HISTORY.push(a);
+}
+
 function go_back() {
-    go_to(HISTORY.pop());
+    if (HISTORY.length < 2) return;
+    HISTORY.pop();
+    open_page(HISTORY[HISTORY.length - 1]);
 }
 
 function error_handler(e) {

