@@ -144,12 +144,14 @@ function ready() {
             document.title = "xshell » " + this.innerHTML;
             /* Activate page */
             $("#page-" + this.dataset.link).attr("class", "page-container");
-            var activateFunction = window[this.dataset.link.replace("-", "") + "_activate"];
-            activateFunction();
-
+            try {
+                var activateFunction = window[this.dataset.link.replace("-", "") + "_activate"];
+                activateFunction();
+            } catch(e) {
+                error_handler(e);
+            }
         });
     });
-    //go_to("dashboard");
     /* Check if a sidebar location is already specified in URL */
     $("#sidebar li").each(function(index) {
         if (("#" + this.dataset.link) == window.location.hash) {
@@ -184,12 +186,13 @@ function dashboard_activate() {
         go_to("file-system");
     });
     $.getJSON(URL + "?ajax=info", function(data) {
-        console.dir(data);
-        $("#p-software").html(data.server_software.replace("Apache", "<strong>Apache</strong>") + "<br />" + data.php_uname.replace("Linux", "<strong>Linux</strong>").replace("Unix", "<strong>Unix</strong>").replace("Windows", "<strong>Windows</strong>"));
-        $("#p-environment").html("User: " + data.user + "<br />Root: " + data.document_root + "<br />File: " + data.filename);
-        for (var i = 0; i < data.services.length; i++) {
-            $("#p-services").html($("#p-services").html() + data.services[i] + "<br />");
-        }
+        try {
+            $("#p-software").html(data.server_software.replace("Apache", "<strong>Apache</strong>") + "<br />" + data.php_uname.replace("Linux", "<strong>Linux</strong>").replace("Unix", "<strong>Unix</strong>").replace("Windows", "<strong>Windows</strong>"));
+            $("#p-environment").html("User: " + data.user + "<br />Root: " + data.document_root + "<br />File: " + data.filename);
+            for (var i = 0; i < data.services.length; i++) {
+                $("#p-services").html($("#p-services").html() + data.services[i] + "<br />");
+            }
+        } catch (e) {error_handler(e);}
         wait(false);
     });
 }
@@ -198,21 +201,22 @@ function information_activate() {
     wait(true);
     $.getJSON(URL + "?ajax=info", function(data) {
         xshell_log("Received information data from server");
-        console.dir(data);
-        $("#span-filename").html(data.filename);
-        $("#span-php-version").html(data.php_version);
-        $("#span-system").html(data.system);
-        $("#span-user").html(data.user);
-        $("#span-extensions").html("");
-        for (var i = 0; i < data.extensions.length; i ++) {
-            $("#span-extensions").html($("#span-extensions").html() + data.extensions[i] + (i == data.extensions.length - 1 ? "" : ", "));
-        }
-        $("#span-ps").html(data.ps);
-        $("#span-httpd-root").html(data.httpd_root);
-        for (var key in data.config) {
-            $("#table-php-config").append("<tr><td>" + key + "</td><td>" + data.config[key] + "</td></tr>");
-        }
-        $("#pre-server-config").html(data.server_config);
+        try {
+            $("#span-filename").html(data.filename);
+            $("#span-php-version").html(data.php_version);
+            $("#span-system").html(data.system);
+            $("#span-user").html(data.user);
+            $("#span-extensions").html("");
+            for (var i = 0; i < data.extensions.length; i ++) {
+                $("#span-extensions").html($("#span-extensions").html() + data.extensions[i] + (i == data.extensions.length - 1 ? "" : ", "));
+            }
+            $("#span-ps").html(data.ps);
+            $("#span-httpd-root").html(data.httpd_root);
+            for (var key in data.config) {
+                $("#table-php-config").append("<tr><td>" + key + "</td><td>" + data.config[key] + "</td></tr>");
+            }
+            $("#pre-server-config").html(data.server_config);
+        } catch (e) {error_handler(e);}
         wait(false);
     });
 }
@@ -222,49 +226,51 @@ function filesystem_navigate(dir) {
     wait(true);
     $.getJSON(URL + "?ajax=dir&dir=" + $(".file-browser").get(0).dataset.dir + "&go=" + dir, function(data) {
         xshell_log("Received filesystem data from server for " + data.dir);
-        $(".file-browser").get(0).dataset.dir = data.dir;
-        $("#page-file-system h3 small").html(data.dir);
-        console.dir(data);
-        /* Clear file browser */
-        $(".file-browser ul").empty();
-        for (var i = 0; i < data.dirs.length; i ++) {
-            $(".file-browser ul").append('<li class="file-browser file-directory" data-dir="' + data.dirs[i] + '"><h3>' + data.dirs[i] + '</h3><p>Directory</p></li>');
-            $(".file-browser ul li").last().click(function(){
-                filesystem_navigate(this.dataset.dir);
-            });
-        }
-        for (var i = 0; i < data.files.length; i ++) {
-            console.log(data.files[i]);
-            var ft = 'misc';
-            var dot = data.files[i].indexOf(".");
-            var ext = (dot == -1 ? data.files[i] : data.files[i].substr(dot)).toLowerCase();
-            if (ext == ".php") {ft = "php";}
-            if (ext == ".html" || ext == ".htm") {ft = "html";}
-            if (ext == ".jpg" || ext == ".png" || ext == ".bmp") {ft = "image";}
-            $(".file-browser ul").append('<li class="file-browser file-' + ft + '" data-dir="' + data.files[i] + '" data-ft="' + ft + '"><h3>' + data.files[i] + '</h3><p>' + (ft == "misc" ? ext : ft) + ' file</p></li>');
-            $(".file-browser ul li").last().click(function(){
-                console.log(this.dataset.dir);
-                $(".right-sidebar").fadeIn(250);
-                $(".right-sidebar h3").html(this.dataset.dir);
-                if (this.dataset.ft == "image") {
-                    $(".right-sidebar img").show();
-                    $(".right-sidebar img").get(0).src = URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir;
-                    $(".right-sidebar pre").hide();
-                } else {
-                    $(".right-sidebar pre").show();
-                    $(".right-sidebar pre").get(0).innerHTML = 'Loading...';//URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir;
-                    $.get(URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir, function(data){
-                        $(".right-sidebar pre").html(data.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
-                    })
-                    //$(".right-sidebar pre").load(URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir);
-                    $(".right-sidebar img").hide();
-                }
-            });
-            if (ft == "image") {
-                console.log(URL + "?ajax=get&get=" + data.dir + "/" + data.files[i]);
-                $(".file-browser ul li").last().append('<div class="preview" style="background-image:url(' + URL + '?ajax=get&get=' + data.dir + '/' + data.files[i] + ')"></div>');
+        try {
+            $(".file-browser").get(0).dataset.dir = data.dir;
+            $("#page-file-system h3 small").html(data.dir);
+            console.dir(data);
+            /* Clear file browser */
+            $(".file-browser ul").empty();
+            for (var i = 0; i < data.dirs.length; i ++) {
+                $(".file-browser ul").append('<li class="file-browser file-directory" data-dir="' + data.dirs[i] + '"><h3>' + data.dirs[i] + '</h3><p>Directory</p></li>');
+                $(".file-browser ul li").last().click(function(){
+                    filesystem_navigate(this.dataset.dir);
+                });
             }
-        }
+            for (var i = 0; i < data.files.length; i ++) {
+                console.log(data.files[i]);
+                var ft = 'misc';
+                var dot = data.files[i].indexOf(".");
+                var ext = (dot == -1 ? data.files[i] : data.files[i].substr(dot)).toLowerCase();
+                if (ext == ".php") {ft = "php";}
+                if (ext == ".html" || ext == ".htm") {ft = "html";}
+                if (ext == ".jpg" || ext == ".png" || ext == ".bmp") {ft = "image";}
+                $(".file-browser ul").append('<li class="file-browser file-' + ft + '" data-dir="' + data.files[i] + '" data-ft="' + ft + '"><h3>' + data.files[i] + '</h3><p>' + (ft == "misc" ? ext : ft) + ' file</p></li>');
+                $(".file-browser ul li").last().click(function(){
+                    console.log(this.dataset.dir);
+                    $(".right-sidebar").fadeIn(250);
+                    $(".right-sidebar h3").html(this.dataset.dir);
+                    if (this.dataset.ft == "image") {
+                        $(".right-sidebar img").show();
+                        $(".right-sidebar img").get(0).src = URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir;
+                        $(".right-sidebar pre").hide();
+                    } else {
+                        $(".right-sidebar pre").show();
+                        $(".right-sidebar pre").get(0).innerHTML = 'Loading...';//URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir;
+                        $.get(URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir, function(data){
+                            $(".right-sidebar pre").html(data.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+                        })
+                        //$(".right-sidebar pre").load(URL + '?ajax=get&get=' + $(".file-browser").get(0).dataset.dir + '/' + this.dataset.dir);
+                        $(".right-sidebar img").hide();
+                    }
+                });
+                if (ft == "image") {
+                    console.log(URL + "?ajax=get&get=" + data.dir + "/" + data.files[i]);
+                    $(".file-browser ul li").last().append('<div class="preview" style="background-image:url(' + URL + '?ajax=get&get=' + data.dir + '/' + data.files[i] + ')"></div>');
+                }
+            }
+        } catch (e) {error_handler(e);}
         wait(false);
     });
 }
@@ -276,16 +282,18 @@ function filesystem_activate() {
 function vulnerabilities_activate() {
     wait(true);
     $.getJSON(URL + "?ajax=vulnerabilities", function(data){
-        $("div#page-vulnerabilities div.page").empty();
-        for (var id in data) {
-            var vuln = $('<div class="tile double orange" data-id="' + id + '">'
-                + '<h3>' + id + '</h3>'
-                + '<p>' + data[id] + '</p>'
-                + '</div>').appendTo("div#page-vulnerabilities div.page");
-            vuln.click(function() {
-                window.open('http://www.osvdb.org/show/osvdb/' + this.dataset.id);
-            });
-        }
+        try {
+            $("div#page-vulnerabilities div.page").empty();
+            for (var id in data) {
+                var vuln = $('<div class="tile double orange" data-id="' + id + '">'
+                    + '<h3>' + id + '</h3>'
+                    + '<p>' + data[id] + '</p>'
+                    + '</div>').appendTo("div#page-vulnerabilities div.page");
+                vuln.click(function() {
+                    window.open('http://www.osvdb.org/show/osvdb/' + this.dataset.id);
+                });
+            }
+        } catch (e) {error_handler(e);}
         wait(false);
     });
 }
@@ -298,10 +306,11 @@ function console_activate() {
         term.pause();
         $.getJSON(URL + "?ajax=passthru&passthru=" + escape(command), function(data){
             xshell_log("Received console data");
-            console.dir(data);
-            $("#console").get(0).dataset.cwd = data.cwd;
-            TERM.echo(data.output);
-            TERM.resume();
+            try {
+                $("#console").get(0).dataset.cwd = data.cwd;
+                TERM.echo(data.output);
+                TERM.resume();
+            } catch (e) {error_handler(e);}
             wait(false);
         })
     }, {prompt: '$ ', name: 'console', 'greetings': 'xshell v2.0.0a', 'enabled': false});
@@ -318,4 +327,25 @@ function xshell_log(text) {
 
 function go_back() {
     go_to(HISTORY.pop());
+}
+
+function error_handler(e) {
+    var details = Array();
+    details['message'] = e.message;
+    details['name'] = e.name
+    try {
+        details['line_number'] = e.linenumber;
+    } catch(e) {
+        details['line_number'] = null;
+    }
+    try {
+        details ['stack'] = e.stack;
+    } catch(e) {
+        details['stack'] = null;
+    }
+    console.dir(e);
+    console.dir(details);
+    $("#div-loading h3").html("Error");
+    $("#loading-text").html("An unexpected JavaScript error occurred :(<br /><small>(" + details['name'] + ")</small>");
+    $("#div-loading").show("slide", { direction: "right" }, 200);
 }

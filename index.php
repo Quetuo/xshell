@@ -3,6 +3,13 @@
      * xshell 
      */
 
+    function error_handler($errno, $errstr)
+    {
+
+    }
+
+    set_error_handler("error_handler");
+
     /* Gather information about the server */
     /* Find out who we are */
     //var_dump($_SERVER);
