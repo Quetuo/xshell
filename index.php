@@ -148,6 +148,6 @@
     }
     else
     {
-        include('template.html');
+        include('template.o');
     }
 ?>

@@ -6,6 +6,7 @@ URL = "http://" + window.location.host + window.location.pathname;
 TERM = null;
 STARTTIME = null;
 HISTORY = [];
+LOADING_NOTES = (window.innerWidth >= 1166) ? '' : 'Your screen is smaller than 1166 pixels wide. Some pages may not render correctly.'
 
 /**
  * Array holding a list of scripts to dynamically load
@@ -23,8 +24,8 @@ var scripts = [
  * @type {Array}
  */
 var styles = [
-    'https://raw.github.com/FortAwesome/Font-Awesome/master/css/font-awesome.min.css',
     'https://raw.github.com/jcubic/jquery.terminal/master/css/jquery.terminal.css',
+    'https://raw.github.com/FortAwesome/Font-Awesome/master/css/font-awesome.min.css',
     'http://fonts.googleapis.com/css?family=Open+Sans:300'
 ];
 
@@ -68,8 +69,8 @@ function loadStyle(url, callback) {
 function loadResources() {
     // Check if we're done
     if (styles.length == 0 && scripts.length == 0) {
-        document.getElementById('loading-text').innerHTML = 'Done!';
-        setTimeout(ready, 500);
+        document.getElementById('loading-text').innerHTML = 'Done!<br /><small>' + LOADING_NOTES + '</small>';
+        setTimeout(ready, 1000);
         return;
     }
     var url;
@@ -77,7 +78,7 @@ function loadResources() {
     if (styles.length > 0) {
         url = styles.pop();
         document.getElementById('loading-text').innerHTML = 
-            'Loading ' + url + '...';
+            'Loading ' + url + '...<br /><small>' + LOADING_NOTES + '</small>';
         loadStyle(url, loadResources);
         return;
     }
@@ -85,7 +86,7 @@ function loadResources() {
     if (scripts.length > 0) {
         url = scripts.pop();
         document.getElementById('loading-text').innerHTML = 
-            'Loading ' + url + '...';
+            'Loading ' + url + '...<br /><small>' + LOADING_NOTES + '</small>'
         loadScript(url, loadResources);
         return;
     }
