@@ -575,7 +575,7 @@
             TERM = null;
             STARTTIME = null;
             HISTORY = [];
-            VERSION = "2.0.11-a0";
+            VERSION = "2.0.12-a0";
 
             /**
              * Array holding a list of scripts to dynamically load
@@ -845,38 +845,22 @@
             function console_activate() {
                 console.log("console_activate");
                 $("#console").terminal(function(command, term) {
-
+                    wait(true);
                     TERM = term;
                     term.pause();
-                    //term.resize(80, 24);
                     $.getJSON(URL + "?ajax=passthru&passthru=" + escape(command), function(data){
                         xshell_log("Received console data");
                         console.dir(data);
                         $("#console").get(0).dataset.cwd = data.cwd;
                         TERM.echo(data.output);
                         TERM.resume();
+                        wait(false);
                     })
-                }, {prompt: '>', name: 'console', 'greetings': 'xshell v2.0.0a', 'enabled': false});
+                }, {prompt: '$ ', name: 'console', 'greetings': 'xshell v2.0.0a', 'enabled': false});
             }
 
             function help_activate() {
                 
-            }
-
-            function console_launch() {
-                
-                /* Set up websocket */
-                SOCK = new WebSocket(URL.replace("http://", "ws://") + "?ajax=ws&XDEBUG_SESSION_START=session_name", "soap");
-                SOCK.onopen = function() {
-                    console.log("Web socket opened");
-                    SOCK.send("Hello, World!");
-                }
-                SOCK.onerror = function(error) {
-                    console.log(error);
-                }
-                SOCK.onclose = function() {
-                    console.log("Web socket closed");
-                }
             }
 
             function xshell_log(text) {
