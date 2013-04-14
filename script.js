@@ -12,7 +12,7 @@ HISTORY = [];
  * @type {Array}
  */
 var scripts = [
-    'jquery.terminal.js',
+    'https://raw.github.com/jcubic/jquery.terminal/master/js/jquery.terminal-min.js',
     'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
     'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
     'https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js'
@@ -23,6 +23,7 @@ var scripts = [
  * @type {Array}
  */
 var styles = [
+    'https://raw.github.com/jcubic/jquery.terminal/master/css/jquery.terminal.css'
     'http://fonts.googleapis.com/css?family=Open+Sans:300',
     'http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300'
 ];
@@ -149,7 +150,7 @@ function ready() {
 
         });
     });
-    go_to("dashboard");
+    //go_to("dashboard");
     /* Check if a sidebar location is already specified in URL */
     $("#sidebar li").each(function(index) {
         if (("#" + this.dataset.link) == window.location.hash) {
@@ -207,6 +208,12 @@ function information_activate() {
         for (var i = 0; i < data.extensions.length; i ++) {
             $("#span-extensions").html($("#span-extensions").html() + data.extensions[i] + (i == data.extensions.length - 1 ? "" : ", "));
         }
+        $("#span-ps").html(data.ps);
+        $("#span-httpd-root").html(data.httpd_root);
+        for (var key in data.config) {
+            $("#table-php-config").append("<tr><td>" + key + "</td><td>" + data.config[key] + "</td></tr>");
+        }
+        $("#pre-server-config").html(data.server_config);
         wait(false);
     });
 }

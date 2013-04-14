@@ -41,6 +41,29 @@
             /* Free space */
             //passthru('df ' . $_SERVER['DOCUMENT_ROOT'] . ' -P');
             $free_space = ob_get_clean();
+            /* Process */
+            $ps = explode("\n", shell_exec("ps --no-headers -o cmd U " . $processUser['name']));
+            $ps = explode(" ", $ps[0]);
+            $ps = $ps[0];
+            /* httpd root */
+            $lines = explode("\n", shell_exec($ps . ' -V'));
+            foreach ($lines as $line)
+            {
+                if (strpos($line, "-D HTTPD_ROOT") > 0)
+                {
+                    eval(str_replace("-D HTTPD_ROOT", '$httpd_root', $line) . ';');
+                }
+                if (strpos($line, "-D SERVER_CONFIG_FILE") > 0)
+                {
+                    eval(str_replace("-D SERVER_CONFIG_FILE", '$server_config_file', $line) . ';');
+                }
+            }
+            /* Read config */
+            $_server_config = preg_replace('/\s*#.*/', '', explode("\n", file_get_contents($httpd_root . '/' . $server_config_file)));
+            foreach ($_server_config as $s)
+            {
+                if (strlen($s) > 0) $server_config .= trim($s) . "\n";
+            }
 
             /* JSON-encode it */
             $ret = array(
@@ -53,7 +76,11 @@
                 'services' => $services,
                 'php_version' => PHP_VERSION,
                 'system' => php_uname('a'),
-                'extensions' => get_loaded_extensions()
+                'extensions' => get_loaded_extensions(),
+                'config' => parse_ini_file(php_ini_loaded_file()),
+                'ps' => $ps,
+                'httpd_root' => $httpd_root,
+                'server_config' => $server_config
             );
             echo json_encode($ret);
         }
@@ -86,6 +113,10 @@
             $ret['output'] = $output;
             $ret['cwd'] = getcwd();
             echo json_encode($ret);
+        }
+        if ($_REQUEST['ajax'] == 'config')
+        {
+            echo json_encode(parse_ini_file(php_ini_loaded_file()));
         }
         die();
     }
