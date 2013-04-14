@@ -1,9 +1,0 @@
-#!/usr/bin/php
-<?
-	if (count($argv) != 2) die();
-	$data = file_get_contents($argv[1]);
-	$data = substr_replace($data, "", 0, 5);
-	$data = substr_replace($data, "", -2, 2);
-	$data = base64_encode(gzdeflate($data, 9));
-	echo '<?php eval(gzinflate(base64_decode("' . $data . '"))); ?>';
-?>
