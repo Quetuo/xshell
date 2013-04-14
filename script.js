@@ -23,9 +23,8 @@ var scripts = [
  * @type {Array}
  */
 var styles = [
-    'https://raw.github.com/jcubic/jquery.terminal/master/css/jquery.terminal.css'
-    'http://fonts.googleapis.com/css?family=Open+Sans:300',
-    'http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300'
+    'https://raw.github.com/jcubic/jquery.terminal/master/css/jquery.terminal.css',
+    'http://fonts.googleapis.com/css?family=Open+Sans:300'
 ];
 
 /**
