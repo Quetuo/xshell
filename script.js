@@ -23,6 +23,7 @@ var scripts = [
  * @type {Array}
  */
 var styles = [
+    'https://raw.github.com/FortAwesome/Font-Awesome/master/css/font-awesome.min.css',
     'https://raw.github.com/jcubic/jquery.terminal/master/css/jquery.terminal.css',
     'http://fonts.googleapis.com/css?family=Open+Sans:300'
 ];
@@ -345,7 +346,7 @@ function error_handler(e) {
     }
     console.dir(e);
     console.dir(details);
-    $("#div-loading h3").html("Error");
+    $("#div-loading h3").html('<span class="icon">&#xf06a;</span> Error');
     $("#loading-text").html("An unexpected JavaScript error occurred :(<br /><small>(" + details['name'] + ")</small>");
     $("#div-loading").show("slide", { direction: "right" }, 200);
 }

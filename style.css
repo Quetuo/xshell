@@ -7,6 +7,27 @@ body {
     margin: 0;
 }
 
+/* Fonts */
+@font-face
+{
+    font-family: 'Font Awesome';
+    src: url('https://github.com/FortAwesome/Font-Awesome/raw/master/font/fontawesome-webfont.ttf');
+}
+.tile-icon {
+    font-family: 'Font Awesome';
+    font-size: 100px;
+    line-height: 135px;
+    text-align: center;
+    display: block;
+    margin: 0 auto;
+}
+.icon {
+    font-family: 'Font Awesome';
+    font-size: 100px;
+    line-height: 135px;
+    display: block;
+}
+
 /* Header */
 body header {
     background: #1f1f1f;
