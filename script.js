@@ -291,7 +291,7 @@ function console_activate() {
             } catch (e) {error_handler(e);}
             wait(false);
         })
-    }, {prompt: '$ ', name: 'console', 'greetings': 'xshell v2.0.0a', 'enabled': false});
+    }, {prompt: '$ ', name: 'console', 'greetings': 'xshell ' + VERSION, 'enabled': false});
 }
 
 function help_activate() {
@@ -323,7 +323,12 @@ function fileeditor_activate() {
             });
             $("#tile-save").removeClass("inactive");
             $("#tile-delete").click(function(){
-
+                EDITOR.setReadOnly(true);
+                wait(true);
+                $.get(URL + "?ajax=delete&file=" + $("#page-file-editor").get(0).dataset.file, function(data) {
+                    wait(false);
+                    go_back();
+                })
             });
             $("#tile-delete").removeClass("inactive");
         }

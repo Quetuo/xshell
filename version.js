@@ -1,1 +1,1 @@
-VERSION = "2.0.16-dev";
+VERSION = "2.0.16-rc1";

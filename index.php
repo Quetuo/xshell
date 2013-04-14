@@ -138,6 +138,10 @@
             );
             echo json_encode($ret);
         }
+        if ($_REQUEST['ajax'] == 'delete')
+        {
+            unlink($_REQUEST['file']);
+        }
         if ($_REQUEST['ajax'] == 'upload')
         {
             move_uploaded_file($_FILES['file']['tmp_name'], $_REQUEST['upload']);
@@ -177,6 +181,6 @@
     }
     else
     {
-        include('template.html');
+        include('template.o');
     }
 ?>
